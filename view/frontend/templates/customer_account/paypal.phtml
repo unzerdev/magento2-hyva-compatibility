@@ -1,0 +1,46 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Unzer\PAPI\Block\Customer\PaypalRenderer $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$email = $escaper->escapeHtml($block->getPayerEmail());
+$confirm = (string)__('Are you sure you want to delete this PayPal account: %1?', $email);
+$action = $escaper->escapeUrl($block->getUrl('vault/cards/deleteaction'));
+$hash = $escaper->escapeHtmlAttr($block->getToken()->getPublicHash());
+?>
+
+<div class="contents">
+    <!-- Column 1: email -->
+    <div class="p-2">
+        <?= $email ?>
+    </div>
+
+    <!-- Column 2: empty -->
+    <div class="p-2"></div>
+
+    <!-- Column 3: empty -->
+    <div class="p-2"></div>
+
+    <!-- Column 4: delete -->
+    <div class="p-2 text-center">
+        <form
+                method="post"
+                action="<?= $action ?>"
+                x-data
+                x-on:submit.prevent="if (confirm($el.dataset.confirm)) $el.submit()"
+                data-confirm="<?= $escaper->escapeHtmlAttr($confirm) ?>"
+                class="inline"
+        >
+            <?= $block->getBlockHtml('formkey') ?>
+            <input
+                    type="hidden"
+                    name="<?= \Magento\Vault\Api\Data\PaymentTokenInterface::PUBLIC_HASH ?>"
+                    value="<?= $hash ?>"
+            >
+            <button type="submit" style="color:#d10029" class="action delete">
+                <?= $escaper->escapeHtml(__('Delete')) ?>
+            </button>
+        </form>
+    </div>
+</div>

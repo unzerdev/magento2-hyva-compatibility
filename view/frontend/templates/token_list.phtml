@@ -1,0 +1,66 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Vault\Block\Customer\AccountTokens $block */
+
+/** @var \Magento\Framework\Escaper $escaper */
+
+use Magento\Framework\Escaper;
+
+$tokens = $block->getPaymentTokens();
+if (empty($tokens)) {
+    return;
+}
+
+$groups = [
+        'paypal' => [],
+        'direct_debit' => [],
+];
+
+foreach ($tokens as $token) {
+    $code = (string)$token->getPaymentMethodCode();
+
+    if (strpos($code, 'paypal') !== false) {
+        $groups['paypal'][] = $token;
+    }
+
+    if (strpos($code, 'direct_debit') !== false) {
+        $groups['direct_debit'][] = $token;
+    }
+}
+
+$titles = [
+        'paypal' => __('PayPal Account'),
+        'direct_debit' => __('SEPA Direct Debit'),
+];
+?>
+
+<?php foreach (['paypal', 'direct_debit'] as $groupKey): ?>
+    <?php if (!empty($groups[$groupKey])): ?>
+
+        <div class="card grid grid-cols-4 mb-4">
+
+            <!-- Header -->
+            <div class="text-sm text-secondary p-2 font-medium">
+                <?= $escaper->escapeHtml($titles[$groupKey]) ?>
+            </div>
+
+            <div class="text-sm text-secondary p-2 text-center">
+            </div>
+            <div class="text-sm text-secondary p-2 text-center">
+            </div>
+
+            <div class="text-sm text-secondary p-2 text-right">
+                <span class="sr-only"><?= $escaper->escapeHtml(__('Actions')) ?></span>
+            </div>
+
+            <!-- Tokens -->
+            <?php foreach ($groups[$groupKey] as $token): ?>
+                <?= /* @noEscape */
+                $block->renderTokenHtml($token) ?>
+            <?php endforeach; ?>
+
+        </div>
+
+    <?php endif; ?>
+<?php endforeach; ?>

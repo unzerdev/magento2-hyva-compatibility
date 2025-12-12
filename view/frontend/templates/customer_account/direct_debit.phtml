@@ -1,0 +1,49 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Unzer\PAPI\Block\Customer\DirectDebitRenderer $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$iban = $escaper->escapeHtml($block->getMaskedIban());
+$holder = $escaper->escapeHtml($block->getAccountHolder());
+$confirm = (string)__('Are you sure you want to delete this SEPA Direct Debit mandate: %1?', $iban);
+$action = $escaper->escapeUrl($block->getUrl('vault/cards/deleteaction'));
+$hash = $escaper->escapeHtmlAttr($block->getToken()->getPublicHash());
+?>
+
+<div class="contents">
+    <!-- Column 1: holder -->
+    <div class="p-2">
+        <?= $holder ?>
+    </div>
+
+    <!-- Column 2: IBAN -->
+    <div class="p-2 text-center text-secondary">
+        <?= $iban ?>
+    </div>
+
+    <!-- Column 3: empty -->
+    <div class="p-2"></div>
+
+    <!-- Column 3: delete -->
+    <div class="p-2 text-center">
+        <form
+                method="post"
+                action="<?= $action ?>"
+                x-data
+                x-on:submit.prevent="if (confirm($el.dataset.confirm)) $el.submit()"
+                data-confirm="<?= $escaper->escapeHtmlAttr($confirm) ?>"
+                class="inline"
+        >
+            <?= $block->getBlockHtml('formkey') ?>
+            <input
+                    type="hidden"
+                    name="<?= \Magento\Vault\Api\Data\PaymentTokenInterface::PUBLIC_HASH ?>"
+                    value="<?= $hash ?>"
+            >
+            <button type="submit" style="color:#d10029" class="action delete">
+                <?= $escaper->escapeHtml(__('Delete')) ?>
+            </button>
+        </form>
+    </div>
+</div>
